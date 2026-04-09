@@ -11,8 +11,7 @@ tasks = [
 ]
 # lista de tarefas em memória (simula um banco de dados)
 
-print("task created")
-#testar git
+
 
 @app.get("/")
 # define uma rota GET na raiz "/"
@@ -28,8 +27,10 @@ def home():
 
 def get_tasks():
 # função executada ao acessar "/tasks"
-
-    return tasks
+    return {
+        "message": "chegou aqui",
+        "tasks": tasks
+    }
     # retorna a lista de tarefas
 
 @app.post("/tasks")

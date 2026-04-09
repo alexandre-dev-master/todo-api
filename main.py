@@ -5,7 +5,7 @@ app = FastAPI()
 # cria a aplicação (sua API)
 
 tasks = [
-    {"id": 1, "title": "Estudar Python!", "done": True},
+    {"id": 1, "title": "Estudar Python", "done": True},
     {"id": 2, "title": "Treinar API", "done": False}
 
 ]

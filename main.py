@@ -11,12 +11,15 @@ tasks = [
 ]
 # lista de tarefas em memória (simula um banco de dados)
 
+print("task created")
+#testar git
+
 @app.get("/")
 # define uma rota GET na raiz "/"
 
 def home():
 # função que será executada quando acessar "/"
-
+    
     return {"message": "ToDo API funcionando!"}
     # retorna um JSON como resposta
 

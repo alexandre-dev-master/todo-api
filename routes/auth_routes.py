@@ -34,6 +34,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         db
     )
 
+    if not token:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
+
     return {
         "access_token": token,
         "token_type": "bearer"

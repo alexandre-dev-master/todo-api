@@ -16,7 +16,7 @@ from models import User
 from schemas import TaskCreate, TaskUpdate, TaskResponseEnvelope
 # schemas usados nas rotas
 
-from services.task_service import get_tasks, create_task, delete_task, update_task
+from services.task_service import get_tasks_service, create_task_service, delete_task_service, update_task_service
 # funções do service
 
 
@@ -28,92 +28,54 @@ router = APIRouter(prefix="/tasks")
 # GET - LISTAR TASKS
 # =========================
 @router.get("/", response_model=TaskResponseEnvelope)
-# GET /tasks
-
-def get_tasks(user, db, page, limit, search, done, order):
-    query = db.query(Task)
-    # Inicia a preparação do comando SQL (SELECT * FROM tasks)
-
-    if user.role != "admin":
-        query = query.filter(Task.owner_id == user.id)
-    # Se não for admin, adiciona um filtro para buscar apenas as tarefas do ID do usuário logado
-
-    if search:
-        query = query.filter(Task.title.contains(search))
-    # Se houver busca, filtra títulos que contenham o texto enviado (operador LIKE)
-
-    if done is not None:
-        query = query.filter(Task.done == done)
-    # Se o filtro 'done' foi enviado (True/False), filtra pelo status de conclusão
-
-    if order == "asc":
-        query = query.order_by(Task.id.asc())
-    else:
-        query = query.order_by(Task.id.desc())
-    # Define a ordenação: 'asc' para as mais antigas primeiro, ou 'desc' para as novas
-
-    offset = (page - 1) * limit
-    # Calcula quantos registros pular com base na página atual (ex: página 2 pula a página 1)
-
-    tasks = query.offset(offset).limit(limit).all()
-    # Executa a query final no banco trazendo apenas a "fatia" de dados solicitada
-
-    total = query.count()
-    # Conta o total de registros que existem para esses filtros (sem considerar o limite da página)
-
+def get_tasks_route(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
+    search: str = Query(None),
+    done: bool = Query(None),
+    order: str = Query("desc", regex="^(asc|desc)$"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    tasks = get_tasks_service(db, user, page, limit, search, done, order)
     return {
         "success": True,
-        "data": tasks,
-        "metadata": {
-            "total": total,
-            "page": page,
-            "limit": limit
-        }
+        "message": "Lista de tarefas recuperada",
+        "data": tasks
     }
-    # Retorna o dicionário formatado que será convertido em JSON para o cliente
-
 
 # =========================
 # POST - CRIAR TASK
 # =========================
 @router.post("/", response_model=TaskResponseEnvelope)
-# POST /tasks
-
-def create_task_route(
-    task: TaskCreate,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    return create_task(task, user, db)
-    # cria task
-
+def create_task_route(task: TaskCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    nova_task = create_task_service(db, task, user.id)
+    return {
+        "success": True,
+        "message": "Tarefa criada com sucesso",
+        "data": nova_task
+    }
 
 # =========================
 # DELETE - DELETAR TASK
 # =========================
 @router.delete("/{task_id}", response_model=TaskResponseEnvelope)
-# DELETE /tasks/{id}
-
-def delete_task_route(
-    task_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    return delete_task(task_id, user, db)
-    # deleta task
-
+def delete_task_route(task_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    resultado = delete_task_service(db, task_id, user)
+    return {
+        "success": True,
+        "message": resultado["message"],
+        "data": None  # No delete, geralmente o data vai vazio ou nulo
+    }
 
 # =========================
 # PUT - ATUALIZAR TASK
 # =========================
 @router.put("/{task_id}", response_model=TaskResponseEnvelope)
-# PUT /tasks/{id}
-
-def update_task_route(
-    task_id: int,
-    task: TaskUpdate,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    return update_task(task_id, task, user, db)
-    # atualiza task
+def update_task_route(task_id: int, task: TaskUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    task_atualizada = update_task_service(db, task_id, task, user)
+    return {
+        "success": True,
+        "message": "Tarefa atualizada com sucesso",
+        "data": task_atualizada
+    }

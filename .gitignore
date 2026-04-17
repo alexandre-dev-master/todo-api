@@ -1,8 +1,20 @@
+# Bancos de dados locais
+*.db
+
+# Caches do Python
 __pycache__/
 *.py[cod]
-.venv/
+
+# Ambiente virtual
 venv/
-env/
-.env
-*.db
+.venv/
+
+# Configurações de editores
 .vscode/
+.idea/
+
+erro.log
+main.svg
+
+# Arquivo de Configurações (Arquivo)
+.env

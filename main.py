@@ -1,107 +1,53 @@
-from fastapi import FastAPI
-# importa o FastAPI, usado para criar APIs
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from database import engine, Base
+from routes import task_routes, auth_routes
+from utils.responses import api_response
+from fastapi.exceptions import HTTPException
+# Importações estruturais para o core da aplicação
 
 app = FastAPI()
-# cria a aplicação (sua API)
 
-tasks = [
-    {"id": 1, "title": "Estudar Python", "done": True},
-    {"id": 2, "title": "Treinar API", "done": False}
+# =========================
+# DATABASE INTEGRITY
+# =========================
+Base.metadata.create_all(bind=engine)
+# Garante a persistência do schema no SQLite durante o startup
 
-]
-# lista de tarefas em memória (simula um banco de dados)
+# =========================
+# EXCEPTION HANDLER (HTTP)
+# =========================
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=api_response(
+            success=False,
+            message=exc.detail,
+            data=None
+        )
+    )
+    # Intercepta exceções controladas para normalização do envelope de saída
 
+# =========================
+# GLOBAL ERROR CATCH-ALL
+# =========================
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content=api_response(
+            success=False,
+            message="Internal Server Error: consulte os logs para mais detalhes.",
+            data=None
+        )
+    )
+    # Middleware de última instância para evitar vazamento de stacktrace em produção
 
-
-@app.get("/")
-# define uma rota GET na raiz "/"
-
-def home():
-# função que será executada quando acessar "/"
-    
-    return {"message": "ToDo API funcionando!"}
-    # retorna um JSON como resposta
-
-@app.get("/tasks")
-# define uma rota GET em "/tasks"
-
-def get_tasks():
-# função executada ao acessar "/tasks"
-    return {
-        "message": "chegou aqui",
-        "tasks": tasks
-    }
-    # retorna a lista de tarefas
-
-@app.post("/tasks")
-# define rota POST para criar nova tarefa
-
-def create_task(task: dict):
-# recebe um dicionário enviado pelo usuário
-# "task: dict" = tipo esperado (dicionário)
-
-    new_task = {
-        "id": len(tasks) + 1,
-        # cria id automático baseado no tamanho da lista
-
-        "title": task["title"],
-        # pega o título enviado pelo usuário
-
-        "done": False
-        # toda tarefa começa como não concluída
-    }
-
-    tasks.append(new_task)
-    # adiciona a nova tarefa na lista
-
-    return new_task
-    # retorna a tarefa criada
-
-@app.delete("/tasks/{task_id}")
-# define rota DELETE com parâmetro na URL
-
-def delete_task(task_id: int):
-# recebe o id da tarefa como número inteiro
-
-    for task in tasks:
-    # percorre cada tarefa da lista
-    # treina: loop e busca
-
-        if task["id"] == task_id:
-        # verifica se o id da tarefa é igual ao recebido
-
-            tasks.remove(task)
-            # remove a tarefa da lista
-
-            return {"message": "Tarefa removida"}
-            # retorna mensagem de sucesso
-
-    return {"error": "Tarefa não encontrada"}
-    # retorna erro se não achar a tarefa
-
-@app.put("/tasks/{task_id}")
-# define rota PUT para atualizar tarefa
-
-def update_task(task_id: int, updated_data: dict):
-# recebe o id da tarefa e os novos dados enviados pelo usuário
-# "updated_data: dict" = corpo da requisição
-
-    for task in tasks:
-    # percorre todas as tarefas da lista
-
-        if task["id"] == task_id:
-        # verifica se encontrou a tarefa com esse id
-
-            task["title"] = updated_data.get("title", task["title"])
-            # atualiza o título se vier no request
-            # se não vier, mantém o valor atual
-
-            task["done"] = updated_data.get("done", task["done"])
-            # atualiza o status se vier
-            # se não vier, mantém o atual
-
-            return task
-            # retorna a tarefa atualizada
-
-    return {"error": "Tarefa não encontrada"}
-    # retorna erro se não achar a tarefa
+# =========================
+# ROUTE REGISTRATION
+# =========================
+app.include_router(task_routes.router, prefix="/tasks", tags=["Tasks"])
+# Injeção das rotas de negócio com versionamento implícito via prefixo
+app.include_router(auth_routes.router, prefix="/auth", tags=["Auth"])
+# Módulo de segurança e gerenciamento de identidade (Identity Provider)

@@ -2,50 +2,32 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 
-
-# =========================
-# TASK
-# =========================
-class Task(Base):
-    __tablename__ = "tasks"  # nome da tabela no banco
+class User(Base):
+    """
+    Modelo representativo da tabela de usuarios do sistema.
+    Armazena credenciais, perfil de acesso e relacoes com tarefas.
+    """
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    # id único da task
-
-    title = Column(String)
-    # título da tarefa
-
-    done = Column(Boolean, default=False)
-    # se a tarefa foi concluída ou não
-
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    # chave estrangeira → liga a task ao usuário
-    # "users.id" = tabela users, coluna id
-
-    owner = relationship("User", back_populates="tasks")
-    # cria relação com User
-    # permite acessar: task.owner
-
-
-# =========================
-# USER
-# =========================
-class User(Base):
-    __tablename__ = "users"  # nome da tabela no banco
-
-    id = Column(Integer, primary_key=True)
-    # id único do usuário
-
-    username = Column(String, unique=True, index=True)
-    # nome do usuário (não pode repetir)
-
+    email = Column(String, unique=True, index=True)
     password = Column(String)
-    # senha criptografada
+    role = Column(String, default="user") # 'admin' ou 'user'
 
-    role = Column(String, default="user")
-    # 'user' ou 'admin'
-
+    # Relacao um-para-muitos com a tabela de tarefas
     tasks = relationship("Task", back_populates="owner")
-    # relação inversa
-    # permite acessar: user.tasks (lista de tarefas do usuário)
 
+class Task(Base):
+    """
+    Modelo representativo da tabela de tarefas (tasks).
+    Cada tarefa e obrigatoriamente vinculada a um usuario (owner).
+    """
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    done = Column(Boolean, default=False)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    # Referencia ao objeto do usuario dono da tarefa
+    owner = relationship("User", back_populates="tasks")

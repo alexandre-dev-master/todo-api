@@ -1,58 +1,54 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List, Any
 
-# =========================
-# SCHEMA: BASE DE TAREFAS
-# =========================
-class TaskBase(BaseModel):
-    # Contém os campos comuns a todas as versões de uma tarefa
-    title: str = Field(..., min_length=3, max_length=100, description="Título da tarefa")
-    description: Optional[str] = Field(None, max_length=500, description="Detalhes extras")
+class TaskCreate(BaseModel):
+    """
+    Schema para validacao de dados na criacao ou atualizacao de uma tarefa.
+    """
+    title: str
+    done: Optional[bool] = False
 
-# =========================
-# SCHEMA: CRIAÇÃO (POST)
-# =========================
-class TaskCreate(TaskBase):
-    pass
-    # Usado na rota POST para receber dados do usuário
-
-# =========================
-# SCHEMA: ATUALIZAÇÃO (PUT)
-# =========================
-class TaskUpdate(BaseModel):
-    # Todos os campos são opcionais para permitir atualizações parciais
-    title: Optional[str] = Field(None, min_length=3, max_length=100)
-    description: Optional[str] = Field(None, max_length=500)
-    done: Optional[bool] = None
-
-# =========================
-# SCHEMA: RESPOSTA (GET)
-# =========================
-class TaskResponse(TaskBase):
-    # Campos que o banco gera e que a API deve devolver
+class TaskResponse(BaseModel):
+    """
+    Schema para representacao dos dados de uma tarefa no retorno da API.
+    """
     id: int
+    title: str
     done: bool
     owner_id: int
 
     class Config:
-        from_attributes = True 
-        # Permite converter objetos do SQLAlchemy para JSON automaticamente
+        from_attributes = True
 
-# =========================
-# SCHEMA: METADADOS
-# =========================
-class TaskMetadata(BaseModel):
-    # Informações de paginação para o envelope
-    total: int
-    page: int
-    limit: int
-
-# =========================
-# SCHEMA: ENVELOPE (SAÍDA PADRÃO)
-# =========================
 class TaskResponseEnvelope(BaseModel):
-    # Padronização de todas as respostas da API
+    """
+    Estrutura de envelope padronizada para todas as respostas da API de tarefas.
+    """
     success: bool
-    message: Optional[str] = None
-    data: Optional[List[TaskResponse]] = None # Para listas de tarefas
-    metadata: Optional[TaskMetadata] = None # Apenas se houver paginação
+    message: str
+    data: Optional[Any] = None
+
+class UserCreate(BaseModel):
+    """
+    Schema para validacao de dados no registro de novos usuarios.
+    """
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    """
+    Schema para retorno de dados publicos do usuario.
+    """
+    id: int
+    email: EmailStr
+    role: str
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    """
+    Schema para representacao do token de acesso JWT.
+    """
+    access_token: str
+    token_type: str

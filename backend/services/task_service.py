@@ -27,11 +27,12 @@ def get_tasks_service(db: Session, current_user: User, page: int, limit: int, se
     offset = (page - 1) * limit
     return query.offset(offset).limit(limit).all()
 
-def create_task_service(db: Session, task_data: TaskCreate, user_id: int):
+def create_task_service(db: Session, task_data: TaskCreate, user_id: int):    
     """
     Instancia e persiste uma nova tarefa no banco de dados.
     """
-    db_task = Task(title=task_data.title, owner_id=user_id)
+    # model_dump() garante que todos os campos do Schema sejam passados para o Model
+    db_task = Task(**task_data.model_dump(), owner_id=user_id)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -48,9 +49,12 @@ def delete_task_service(db: Session, task_id: int, current_user: User):
     if current_user.role != "admin" and task.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Sem permissão para excluir esta tarefa")
     
+    # Guarda uma cópia dos dados antes de deletar para o retorno
+    task_data = task
+
     db.delete(task)
     db.commit()
-    return {"message": "Tarefa removida"}
+    return task_data
 
 def update_task_service(db: Session, task_id: int, task_data: TaskCreate, current_user: User):
     """

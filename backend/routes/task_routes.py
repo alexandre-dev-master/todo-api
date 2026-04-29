@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from database import get_db
 from dependencies.security import get_current_user
@@ -13,6 +14,10 @@ from models import User
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
+# 1. Definimos o esquema de segurança explicitamente
+# O FastAPI vai usar isso para criar o cadeado no Swagger automaticamente
+security = HTTPBearer()
+
 @router.get("/", response_model=TaskResponseEnvelope)
 def get_tasks_route(
     page: int = Query(1, ge=1),
@@ -20,11 +25,13 @@ def get_tasks_route(
     search: str = Query(None),
     done: bool = Query(None),
     order: str = Query("desc", pattern="^(asc|desc)$"),
+    # 2. O Depends(get_current_user) já cuida da lógica, 
+    # mas o Swagger precisa saber que essa rota REQUER o security.
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Rota para listagem de tarefas com suporte a paginacao, busca e filtros.
+    Rota para listagem de tarefas com suporte a paginação, busca e filtros.
     """
     tasks = get_tasks_service(db, user, page, limit, search, done, order)
     return {
@@ -40,7 +47,7 @@ def create_task_route(
     db: Session = Depends(get_db)
 ):
     """
-    Rota para criacao de uma nova tarefa vinculada ao usuario autenticado.
+    Rota para criação de uma nova tarefa vinculada ao usuário autenticado.
     """
     nova_task = create_task_service(db, task, user.id)
     return {
@@ -56,9 +63,9 @@ def delete_task_route(
     db: Session = Depends(get_db)
 ):
     """
-    Rota para remocao de uma tarefa existente.
+    Rota para remoção de uma tarefa existente.
     """
-    resultado = delete_task_service(db, task_id, user)
+    delete_task_service(db, task_id, user)
     return {
         "success": True,
         "message": "Tarefa removida com sucesso",
@@ -73,7 +80,7 @@ def update_task_route(
     db: Session = Depends(get_db)
 ):
     """
-    Rota para atualizacao parcial ou total de uma tarefa.
+    Rota para atualização parcial ou total de uma tarefa.
     """
     task_atualizada = update_task_service(db, task_id, task, user)
     return {

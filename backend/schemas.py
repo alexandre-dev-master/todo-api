@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Union
 
 class TaskCreate(BaseModel):
     """
@@ -22,11 +22,17 @@ class TaskResponse(BaseModel):
 
 class TaskResponseEnvelope(BaseModel):
     """
-    Estrutura de envelope padronizada para todas as respostas da API de tarefas.
+    Estrutura de envelope padronizada.
+    Usa Union ou tipos específicos para que o Pydantic 
+    saiba como validar o conteúdo de 'data'.
     """
     success: bool
     message: str
-    data: Optional[Any] = None
+
+    data: Optional[Union[TaskResponse, List[TaskResponse], Any]] = None
+
+    class Config:
+        from_attributes = True 
 
 class UserCreate(BaseModel):
     """

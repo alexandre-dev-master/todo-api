@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="icon" href="assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Board | Dev Edition</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-8">
+
+    <div id="login-modal" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl border border-slate-700 w-full max-w-md shadow-2xl">
+            <h2 class="text-2xl font-bold text-white mb-6 font-mono">>_ AUTHENTICATION</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-slate-400 text-sm block mb-1">Email</label>
+                    <input type="email" id="login-email" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-slate-400 text-sm block mb-1">Password</label>
+                    <input type="password" id="login-password" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-all">
+                </div>
+                
+                <button onclick="realizarLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all mt-4">
+                    ENTRAR NO SISTEMA
+                </button>
+                
+                <p id="login-erro" class="text-red-500 text-sm mt-2 hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        
+        <header class="flex justify-between items-center mb-12">
+            <h1 class="text-4xl font-black tracking-tighter text-blue-400">
+                CHAOS_BOARD <span class="text-xs font-mono text-slate-500">v1.0</span>
+            </h1>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="logout()" class="text-xs font-mono text-slate-500 hover:text-white transition-all">
+                    [LOGOUT]
+                </button>
+                
+                <div id="status-tag" class="px-4 py-1 rounded-full bg-red-900 text-red-100 text-xs font-mono uppercase transition-all duration-500">
+                    Offline
+                </div>
+            </div>
+        </header>
+
+        <div class="relative mb-8">
+            <input type="text" id="main-input" 
+                class="w-full bg-slate-800 border-2 border-slate-700 p-4 rounded-xl text-xl font-mono focus:border-blue-500 focus:outline-none transition-all placeholder-slate-600"
+                placeholder="Aguardando comando...">
+             <span class="absolute right-4 top-5 text-slate-500 font-mono text-sm hidden md:inline">[ENTER] TO_PUSH</span>
+        </div>
+
+        <div id="board" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/board.js"></script>
+
+    <script>
+        /**
+         * Verifica a persistência da sessão ao carregar a página.
+         */
+        window.onload = () => {
+            const token = localStorage.getItem(STORAGE_KEY);
+            
+            if (token) {
+                // Se o token existe, remove o bloqueio de login e carrega os dados.
+                document.getElementById('login-modal').classList.add('hidden');
+                loadTasksFromBackend();
+            }
+        };
+    </script>
+</body>
+</html>

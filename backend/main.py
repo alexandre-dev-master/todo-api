@@ -25,13 +25,14 @@ app = FastAPI(
 )
 
 # --- MIDDLEWARE DE SEGURANÇA (CORS) ---
-# Necessário para que o seu Frontend (JavaScript) consiga consumir esta API
+# Necessário para que o  Frontend consiga consumir esta API
 # sem ser bloqueado pela política de mesma origem do navegador.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção, aqui iria apenas o domínio do seu site
-    allow_methods=["*"], # Permite todos os verbos HTTP (GET, POST, PUT, DELETE)
-    allow_headers=["*"], # Permite o envio de Headers customizados (como o Token JWT)
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True, # Isso permite que o navegador envie o Token com segurança
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- INJEÇÃO DE ROTAS (ROUTERS) ---

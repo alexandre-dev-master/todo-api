@@ -1,5 +1,11 @@
+# React
+node_modules/
+dist/
+.env
+
 # Bancos de dados locais
 *.db
+*.sqlite3
 
 # Caches do Python
 __pycache__/

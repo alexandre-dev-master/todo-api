@@ -1,56 +1,275 @@
-#  Notes - Full Stack Task Manager
+# Notes API
 
-O **Notes** é uma aplicação completa de gerenciamento de tarefas (To-Do List) desenvolvida para demonstrar a integração entre um backend moderno em **FastAPI** (Python) e um frontend dinâmico em **React**.
+![Notes API Demo](./demo.gif)
 
-## Tecnologias Utilizadas
+A REST API for managing notes/tasks with authentication, authorization, and user-based access control.
 
-### Backend
-- **FastAPI**: Framework web de alta performance.
-- **SQLAlchemy**: ORM para manipulação de banco de dados.
-- **JWT (JSON Web Tokens)**: Autenticação segura de usuários.
-- **SQLite**: Banco de dados relacional para desenvolvimento local.
+Built with **FastAPI** following clean backend practices, including service-layer separation, JWT authentication, database integration, automated tests, and API documentation with Swagger UI.
 
-### Frontend
-- **React (Vite)**: Biblioteca para interfaces reativas.
-- **Tailwind CSS**: Estilização baseada em utilitários com suporte a Dark Mode.
-- **Axios**: Cliente HTTP para comunicação com a API.
-- **React Router**: Gerenciamento de navegação e proteção de rotas privadas.
+---
 
-## Funcionalidades
+## 🚀 Features
 
-- [x] **Autenticação de Usuários**: Sistema de Login e Registro com criptografia de senhas.
-- [x] **Segurança por Token**: Acesso protegido às rotas via JWT (Bearer Token).
-- [x] **CRUD Completo de Tarefas**: Criar, visualizar, editar e remover tarefas.
-- [x] **Persistência de Dados**: As tarefas são salvas individualmente por usuário no banco de dados.
-- [x] **Interface Moderna**: Design inspirado em painéis de produtividade, totalmente responsivo.
+* User registration
+* User authentication with JWT
+* Protected API endpoints
+* Task CRUD operations
+* User ownership permissions
+* Admin role support
+* Pagination and filtering
+* Automated API tests
+* Interactive Swagger documentation
 
-## Como Executar o Projeto
+---
 
-### 
-1. Clonar o repositório
+## 🛠️ Tech Stack
+
+* **Python 3.12**
+* **FastAPI**
+* **SQLAlchemy 2.0**
+* **Pydantic v2**
+* **SQLite**
+* **JWT Authentication**
+* **Passlib / Bcrypt**
+* **Pytest**
+* **Ruff**
+* **Black**
+
+---
+
+## 📂 Project Structure
+
+```
+.
+├── dependencies/
+│   └── security.py
+│
+├── routes/
+│   ├── auth_routes.py
+│   └── task_routes.py
+│
+├── services/
+│   ├── auth_service.py
+│   └── task_service.py
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_auth.py
+│   └── test_tasks.py
+│
+├── core/
+│   └── config.py
+│
+├── database.py
+├── models.py
+├── schemas.py
+├── auth.py
+├── main.py
+└── requirements.txt
+```
+
+---
+
+## 🔐 Authentication Flow
+
+The API uses JWT tokens to protect private routes.
+
+Flow:
+
+```
+Register user
+      ↓
+Login
+      ↓
+Receive JWT token
+      ↓
+Authorize requests
+      ↓
+Access protected endpoints
+```
+
+Authentication is handled through the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 📌 API Endpoints
+
+### Authentication
+
+| Method | Endpoint         | Description                       |
+| ------ | ---------------- | --------------------------------- |
+| POST   | `/auth/register` | Create a new user                 |
+| POST   | `/auth/login`    | Authenticate user and receive JWT |
+
+---
+
+### Tasks
+
+| Method | Endpoint           | Description     |
+| ------ | ------------------ | --------------- |
+| GET    | `/tasks/`          | List user tasks |
+| POST   | `/tasks/`          | Create a task   |
+| PUT    | `/tasks/{task_id}` | Update a task   |
+| DELETE | `/tasks/{task_id}` | Delete a task   |
+
+---
+
+## 🔒 Authorization Rules
+
+Users can only manage their own tasks.
+
+Examples:
+
+* User A creates a task
+* User B tries to update or delete it
+* API denies the request with `403 Forbidden`
+
+Admins have elevated permissions and can access resources according to their role.
+
+---
+
+## 🧪 Running Tests
+
+Install dependencies:
+
 ```bash
-git clone [https://github.com/alexandre-dev-master/todo-api.git](https://github.com/alexandre-dev-master/todo-api.git)
-cd todo-api
-
-2. Configurar o Backend (Python)
-# Criar o ambiente virtual
-python -m venv venv
-
-# Ativar o ambiente virtual
-# No Windows: venv\Scripts\activate
-# No Linux/Mac: source venv/bin/activate
-
-# Instalar as dependências
 pip install -r requirements.txt
+```
 
-# Iniciar o servidor
+Run the test suite:
+
+```bash
+pytest
+```
+
+Example result:
+
+```
+6 passed
+```
+
+---
+
+## ▶️ Running Locally
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+```
+
+Create a virtual environment:
+
+```bash
+python -m venv venv
+```
+
+Activate it:
+
+Linux/macOS:
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create your environment file:
+
+```bash
+cp .env.example .env
+```
+
+Start the API:
+
+```bash
 uvicorn main:app --reload
+```
 
-3. Configurar o Frontend (React)
-# Instalar as dependências do Node
-npm install
+The API will be available at:
 
-# Iniciar a aplicação
-npm run dev
+```
+http://localhost:8000
+```
 
+Swagger documentation:
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```env
+SECRET_KEY=your_secret_key_here
+ALGORITHM=HS256
+DATABASE_URL=sqlite:///./sql_app.db
+
+## ⚙️ Code Quality
+
+This project uses:
+
+### Black
+
+Automatic code formatting:
+
+```bash
+black .
+```
+---
+
+### Ruff
+
+Linting and code quality checks:
+
+```bash
+ruff check .
+```
+
+The project follows consistent formatting, clean imports, and modern Python typing practices.
+
+---
+
+## 📖 API Documentation
+
+FastAPI automatically generates interactive documentation using Swagger UI.
+
+Available at:
+
+```
+/docs
+```
+
+The documentation allows testing authenticated requests directly through the browser.
+
+---
+
+## 🎯 Project Goals
+
+This project was built to practice and demonstrate:
+
+* Backend API development
+* Authentication and authorization
+* Database modeling
+* Layered architecture
+* Testing REST APIs
+* Production-oriented Python practices
+
+---
+
+## 📄 License
+
+This project is available for learning and portfolio purposes.
 

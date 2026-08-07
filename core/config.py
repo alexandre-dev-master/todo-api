@@ -7,10 +7,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./sql_app.db"
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
-    model_config = SettingsConfigDict(
-        env_file=".env"
-    )
+
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()

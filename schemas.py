@@ -1,6 +1,7 @@
 """
 Pydantic schemas used for request validation and API responses.
 """
+
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 

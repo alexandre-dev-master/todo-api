@@ -32,14 +32,10 @@ def get_tasks_service(
         query = query.filter(models.Task.owner_id == user.id)
 
     if search:
-        query = query.filter(
-            models.Task.title.ilike(f"%{search}%")
-        )
+        query = query.filter(models.Task.title.ilike(f"%{search}%"))
 
     if completed is not None:
-        query = query.filter(
-            models.Task.completed == completed
-        )
+        query = query.filter(models.Task.completed == completed)
 
     if order == "desc":
         query = query.order_by(models.Task.id.desc())
@@ -79,11 +75,7 @@ def delete_task_service(
     """
     Deletes a task after validating ownership permissions.
     """
-    task = (
-        db.query(models.Task)
-        .filter(models.Task.id == task_id)
-        .first()
-    )
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
     if task is None:
         raise HTTPException(
@@ -112,11 +104,7 @@ def update_task_service(
     """
     Updates a task after validating ownership permissions.
     """
-    task = (
-        db.query(models.Task)
-        .filter(models.Task.id == task_id)
-        .first()
-    )
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
     if task is None:
         raise HTTPException(
@@ -130,9 +118,7 @@ def update_task_service(
             detail="You do not have permission to update this task.",
         )
 
-    for field, value in task_data.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in task_data.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
 
     db.commit()

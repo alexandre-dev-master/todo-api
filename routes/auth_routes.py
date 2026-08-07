@@ -19,10 +19,7 @@ from services.auth_service import (
     login_user_service,
 )
 
-
-router = APIRouter(
-    tags=["Auth"]
-)
+router = APIRouter(tags=["Auth"])
 
 
 @router.post("/register")
@@ -60,9 +57,7 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials.",
-            headers={
-                "WWW-Authenticate": "Bearer"
-            },
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     return {

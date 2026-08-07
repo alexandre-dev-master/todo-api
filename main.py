@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 from routes import auth_routes, task_routes
 
-
 Base.metadata.create_all(bind=engine)
 
 

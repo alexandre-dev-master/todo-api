@@ -1,26 +1,27 @@
-# React
-node_modules/
-dist/
+# Environment variables
 .env
 
-# Bancos de dados locais
+# Database files
 *.db
 *.sqlite3
 
-# Caches do Python
+
+# Python cache and generated files
 __pycache__/
 *.py[cod]
 
-# Ambiente virtual
+# Virtual environments
 venv/
 .venv/
+env/
 
-# Configurações de editores
+# Test and coverage files
+.pytest_cache/
+
+# Logs
+*.log
+
+# IDE configuration files
 .vscode/
 .idea/
 
-erro.log
-main.svg
-
-# Arquivo de Configurações (Arquivo)
-.env
